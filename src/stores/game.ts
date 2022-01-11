@@ -21,6 +21,7 @@ export const useGame = defineStore('game', {
       PLAYERS: PLAYERS,
       board: [...Array(ROWS)].map(() => [...Array(COLUMNS)].map(() => '')),
       currentPlayer: PLAYERS[0],
+      hoveredColumnCells: Array(),
     }
   },
   getters: {
@@ -28,17 +29,32 @@ export const useGame = defineStore('game', {
     cellStatus: (state) => {
       return (cellNumber: number) => state.board[Math.floor((cellNumber - 1) / state.COLUMNS)][(cellNumber - 1) % state.COLUMNS]
     },
+    firstSelectableCellInColumn: (state) => {
+      return (cellNumber: number) => state.board.map((cell, index) => {
+        return {
+          cell: cell[(cellNumber - 1) % state.COLUMNS],
+          index: index
+        }
+      }).reverse().filter(cellObj => cellObj.cell === '')[0].index
+    }
   },
   actions: {
     select(cellNumber: number) {
       if (this.cellStatus(cellNumber) === '') {
-        this.board[Math.floor((cellNumber - 1) / this.COLUMNS)][(cellNumber - 1) % this.COLUMNS] = this.currentPlayer.mark
+        this.board[this.firstSelectableCellInColumn(cellNumber)][(cellNumber - 1) % this.COLUMNS] = this.currentPlayer.mark
   
         this.toggleCurrentPlayer()
+        this.handleHoverColumn(cellNumber, false)
       }
     },
     toggleCurrentPlayer() {
       this.currentPlayer = this.PLAYERS.filter(player => player.mark !== this.currentPlayer.mark)[0]
+    },
+    handleHoverColumn(cellNumber: number, reset: boolean) {
+      this.hoveredColumnCells = reset ? Array() : [...Array(this.ROWS)].map((_, index) => {
+        let cellIndex = index * this.COLUMNS + (cellNumber - 1) % this.COLUMNS + 1
+        return this.cellStatus(cellIndex) === '' ? cellIndex : null
+      })
     }
   },
 })
