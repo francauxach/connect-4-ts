@@ -7,7 +7,10 @@ module.exports = {
     extend: {
       borderWidth: {
         "6": "6px",
-      }
+      },
+      fontFamily: {
+        'mochi': ['Mochiy Pop P One']
+      },
     },
   },
   plugins: [],
