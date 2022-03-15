@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "matrix-winner-decider": "^2.0.0",
     "pinia": "^2.0.9",
     "vue": "^3.2.25"
   },

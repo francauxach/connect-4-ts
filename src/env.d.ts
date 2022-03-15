@@ -6,3 +6,8 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+declare module 'matrix-winner-decider' {
+  function checkWinner(board: any, marks: Array<string>, consecutiveOcurrences: number): []
+  export { checkWinner }
+}

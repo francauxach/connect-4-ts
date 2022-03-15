@@ -1,4 +1,5 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { checkWinner } from 'matrix-winner-decider'
 
 export const useGame = defineStore('game', {
   state: () => {
@@ -22,6 +23,7 @@ export const useGame = defineStore('game', {
       board: [...Array(ROWS)].map(() => [...Array(COLUMNS)].map(() => '')),
       currentPlayer: PLAYERS[0],
       hoveredColumnCells: Array(),
+      winnerCells: []
     }
   },
   getters: {
@@ -36,15 +38,23 @@ export const useGame = defineStore('game', {
           index: index
         }
       }).reverse().filter(cellObj => cellObj.cell === '')[0].index
-    }
+    },
+    isWinnerCell: (state) => {
+      return (cellNumber: number): boolean => state.winnerCells.map((position) => (position[0] * state.COLUMNS + position[1]) + 1).includes(cellNumber)
+    },
+    hasEnded: (state) => state.winnerCells && state.winnerCells.length
   },
   actions: {
     select(cellNumber: number) {
-      if (this.cellStatus(cellNumber) === '') {
+      if (this.cellStatus(cellNumber) === '' && !this.hasEnded) {
         this.board[this.firstSelectableCellInColumn(cellNumber)][(cellNumber - 1) % this.COLUMNS] = this.currentPlayer.mark
-  
-        this.toggleCurrentPlayer()
-        this.handleHoverColumn(cellNumber, false)
+        
+        this.winnerCells = checkWinner(this.board, this.PLAYERS.map((player) => player.mark), 4)
+
+        if (!this.hasEnded) {
+          this.toggleCurrentPlayer()
+          this.handleHoverColumn(cellNumber, false)
+        }
       }
     },
     toggleCurrentPlayer() {
@@ -55,6 +65,12 @@ export const useGame = defineStore('game', {
         let cellIndex = index * this.COLUMNS + (cellNumber - 1) % this.COLUMNS + 1
         return this.cellStatus(cellIndex) === '' ? cellIndex : null
       })
+    },
+    restart() {
+      this.board = [...Array(this.ROWS)].map(() => [...Array(this.COLUMNS)].map(() => ''))
+      this.winnerCells = []
+      this.currentPlayer = this.PLAYERS[0]
+      this.hoveredColumnCells = Array()
     }
   },
 })
