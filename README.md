@@ -1,4 +1,4 @@
-# tic-tac-toe-ts
+# connect-4-ts
 
 ## Project setup
 ```
